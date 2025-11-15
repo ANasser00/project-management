@@ -4,12 +4,14 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 /* ROUTE IMPORTS */
 import projectRoutes from "./routes/projectRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import searchRoutes from "./routes/searchRoutes";
 import userRoutes from "./routes/userRoutes";
 import teamRoutes from "./routes/teamRoutes";
+import authRoutes from "./routes/authRoutes";
 
 /* CONFIGURATIONS */
 dotenv.config();
@@ -20,7 +22,13 @@ app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CLIENT_ORIGIN || "http://localhost:3001",
+    credentials: true,
+  })
+);
+app.use(cookieParser());
 
 /* ROUTES */
 app.get("/", (req, res) => {
@@ -32,10 +40,10 @@ app.use("/tasks", taskRoutes);
 app.use("/search", searchRoutes);
 app.use("/users", userRoutes);
 app.use("/teams", teamRoutes);
-  
+app.use("/auth", authRoutes);
 
 /* SERVER */
 const port = Number(process.env.PORT) || 3000;
 app.listen(port, "0.0.0.0", () => {
-  console.log(`Server running on part ${port}`);
+  console.log(`Server running on port ${port}`);
 });

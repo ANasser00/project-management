@@ -4,8 +4,11 @@ import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/app/redux";
 import { setIsDarkMode, setIsSidebarCollapsed } from "@/state";
 import { useGetAuthUserQuery } from "@/state/api";
-import { signOut } from "aws-amplify/auth";
 import Image from "next/image";
+
+const API =
+  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
+  "http://localhost:8000";
 
 const Navbar = () => {
   const dispatch = useAppDispatch();
@@ -14,17 +17,21 @@ const Navbar = () => {
   );
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
-  const { data: currentUser } = useGetAuthUserQuery({});
-  const handleSignOut = async () => {
+  const { data: currentUser } = useGetAuthUserQuery();
+
+  const handleSignOut = async (): Promise<void> => {
     try {
-      await signOut();
+      await fetch(`${API}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      window.location.reload();
     } catch (error) {
       console.error("Error signing out: ", error);
     }
   };
 
   if (!currentUser) return null;
-  const currentUserDetails = currentUser?.userDetails;
 
   return (
     <div className="flex items-center justify-between bg-white px-4 py-3 dark:bg-black">
@@ -76,10 +83,10 @@ const Navbar = () => {
         <div className="ml-2 mr-5 hidden min-h-[2em] w-[0.1rem] bg-gray-200 md:inline-block"></div>
         <div className="hidden items-center justify-between md:flex">
           <div className="align-center flex h-9 w-9 justify-center">
-            {!!currentUserDetails?.profilePictureUrl ? (
+            {!!currentUser?.profilePictureUrl ? (
               <Image
-                src={`https://pm--s3-images.s3.amazonaws.com/${currentUserDetails?.profilePictureUrl}`}
-                alt={currentUserDetails?.username || "User Profile Picture"}
+                src={`https://pm--s3-images.s3.amazonaws.com/${currentUser?.profilePictureUrl}`}
+                alt={currentUser?.username || "User Profile Picture"}
                 width={100}
                 height={50}
                 className="h-full rounded-full object-cover"
@@ -89,7 +96,7 @@ const Navbar = () => {
             )}
           </div>
           <span className="mx-3 text-gray-800 dark:text-white">
-            {currentUserDetails?.username}
+            {currentUser?.username}
           </span>
           <button
             className="hidden rounded bg-blue-400 px-4 py-2 text-xs font-bold text-white hover:bg-blue-500 md:block"

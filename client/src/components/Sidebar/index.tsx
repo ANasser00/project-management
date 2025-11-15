@@ -3,7 +3,6 @@
 import { useAppDispatch, useAppSelector } from "@/app/redux";
 import { setIsSidebarCollapsed } from "@/state";
 import { useGetAuthUserQuery, useGetProjectsQuery } from "@/state/api";
-import { signOut } from "aws-amplify/auth";
 import {
   AlertCircle,
   AlertOctagon,
@@ -27,6 +26,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 
+const API =
+  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
+  "http://localhost:8000";
+
 const Sidebar = () => {
   const [showProjects, setShowProjects] = useState(true);
   const [showPriority, setShowPriority] = useState(true);
@@ -37,16 +40,21 @@ const Sidebar = () => {
     (state) => state.global.isSidebarCollapsed,
   );
 
-  const { data: currentUser } = useGetAuthUserQuery({});
+  const { data: currentUser } = useGetAuthUserQuery();
+
   const handleSignOut = async () => {
     try {
-      await signOut();
+      await fetch(`${API}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      window.location.reload();
     } catch (error) {
       console.error("Error signing out: ", error);
     }
   };
+
   if (!currentUser) return null;
-  const currentUserDetails = currentUser?.userDetails;
 
   const sidebarClassNames = `fixed flex flex-col h-[100%] justify-between shadow-xl
     transition-all duration-300 h-full z-40 dark:bg-black overflow-y-auto bg-white
@@ -164,10 +172,10 @@ const Sidebar = () => {
       <div className="z-10 mt-32 flex w-full flex-col items-center gap-4 bg-white px-8 py-4 dark:bg-black md:hidden">
         <div className="flex w-full items-center">
           <div className="align-center flex h-9 w-9 justify-center">
-            {!!currentUserDetails?.profilePictureUrl ? (
+            {!!currentUser?.profilePictureUrl ? (
               <Image
-                src={`https://pm--s3-images.s3.amazonaws.com/${currentUserDetails?.profilePictureUrl}`}
-                alt={currentUserDetails?.username || "User Profile Picture"}
+                src={`https://pm--s3-images.s3.amazonaws.com/${currentUser?.profilePictureUrl}`}
+                alt={currentUser?.username || "User Profile Picture"}
                 width={100}
                 height={50}
                 className="h-full rounded-full object-cover"
@@ -177,7 +185,7 @@ const Sidebar = () => {
             )}
           </div>
           <span className="mx-3 text-gray-800 dark:text-white">
-            {currentUserDetails?.username}
+            {currentUser?.username}
           </span>
           <button
             className="self-start rounded bg-blue-400 px-4 py-2 text-xs font-bold text-white hover:bg-blue-500 md:block"
