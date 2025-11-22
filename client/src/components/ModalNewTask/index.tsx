@@ -44,10 +44,23 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
       assignedUserId: parseInt(assignedUserId),
       projectId: id !== null ? Number(id) : Number(projectId),
     });
+
+    // Reset form and close modal
+    setTitle("");
+    setDescription("");
+    setStatus(Status.ToDo);
+    setPriority(Priority.Backlog);
+    setTags("");
+    setStartDate("");
+    setDueDate("");
+    setAuthorUserId("");
+    setAssignedUserId("");
+    setProjectId("");
+    onClose();
   };
 
   const isFormValid = () => {
-    return title && authorUserId && !(id !== null || projectId);
+    return title && authorUserId && (id !== null || projectId);
   };
 
   const selectStyles =
@@ -82,11 +95,8 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
           <select
             className={selectStyles}
             value={status}
-            onChange={(e) =>
-              setStatus(Status[e.target.value as keyof typeof Status])
-            }
+            onChange={(e) => setStatus(e.target.value as Status)}
           >
-            <option value="">Select Status</option>
             <option value={Status.ToDo}>To Do</option>
             <option value={Status.WorkInProgress}>Work In Progress</option>
             <option value={Status.UnderReview}>Under Review</option>
@@ -95,11 +105,8 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
           <select
             className={selectStyles}
             value={priority}
-            onChange={(e) =>
-              setPriority(Priority[e.target.value as keyof typeof Priority])
-            }
+            onChange={(e) => setPriority(e.target.value as Priority)}
           >
-            <option value="">Select Priority</option>
             <option value={Priority.Urgent}>Urgent</option>
             <option value={Priority.High}>High</option>
             <option value={Priority.Medium}>Medium</option>
