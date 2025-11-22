@@ -27,6 +27,7 @@ model User {
   taskAssignments TaskAssignment[]
   attachments     Attachment[]
   comments        Comment[]
+  activities      TaskActivity[]
   team            Team?            @relation(fields: [teamId], references: [id])
 }
 
@@ -77,6 +78,7 @@ model Task {
   taskAssignments TaskAssignment[]
   attachments     Attachment[]
   comments        Comment[]
+  activities      TaskActivity[]
 }
 
 model TaskAssignment {
@@ -106,5 +108,19 @@ model Comment {
   userId Int
 
   task Task @relation(fields: [taskId], references: [id])
+  user User @relation(fields: [userId], references: [userId])
+}
+
+model TaskActivity {
+  id        Int      @id @default(autoincrement())
+  taskId    Int
+  userId    Int
+  action    String   // "created", "assigned", "priority_changed", "status_changed", "due_date_changed", etc.
+  field     String?  // which field was changed
+  oldValue  String?  // previous value
+  newValue  String?  // new value
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [userId])
 }
