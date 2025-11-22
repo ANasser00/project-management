@@ -1,17 +1,18 @@
 "use client";
 
 import { useAppSelector } from "@/app/redux";
-import Header from "@/components/Header";
 import { useGetProjectsQuery } from "@/state/api";
+import React, { useMemo, useState } from "react";
 import { DisplayOption, Gantt, ViewMode } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
-import React, { useMemo, useState } from "react";
+import Header from "@/components/Header";
 
 type TaskTypeItems = "task" | "milestone" | "project";
 
 const Timeline = () => {
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
-  const { data: projects, isLoading, isError } = useGetProjectsQuery();
+  const { data: projects, isLoading: isProjectsLoading } =
+    useGetProjectsQuery();
 
   const [displayOptions, setDisplayOptions] = useState<DisplayOption>({
     viewMode: ViewMode.Month,
@@ -19,17 +20,17 @@ const Timeline = () => {
   });
 
   const ganttTasks = useMemo(() => {
-    return (
-      projects?.map((project) => ({
-        start: new Date(project.startDate as string),
-        end: new Date(project.endDate as string),
-        name: project.name,
-        id: `Project-${project.id}`,
-        type: "project" as TaskTypeItems,
-        progress: 50,
-        isDisabled: false,
-      })) || []
-    );
+    if (!projects || projects.length === 0) return [];
+
+    return projects.map((project) => ({
+      start: project.startDate ? new Date(project.startDate) : new Date(),
+      end: project.endDate ? new Date(project.endDate) : new Date(),
+      name: project.name,
+      id: `Project-${project.id}`,
+      type: "project" as TaskTypeItems,
+      progress: 50,
+      isDisabled: false,
+    }));
   }, [projects]);
 
   const handleViewModeChange = (
@@ -41,9 +42,34 @@ const Timeline = () => {
     }));
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError || !projects)
-    return <div>An error occurred while fetching projects</div>;
+  if (isProjectsLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Loading timeline...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!projects || projects.length === 0) {
+    return (
+      <div className="px-4 xl:px-6">
+        <Header name="Project Timeline" />
+        <div className="flex h-[400px] items-center justify-center">
+          <div className="text-center">
+            <p className="text-lg text-gray-500 dark:text-gray-400">
+              No projects available to display in timeline.
+            </p>
+            <p className="mt-2 text-sm text-gray-400 dark:text-gray-500">
+              Create a project to see it here.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-full p-8">
