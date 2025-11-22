@@ -1,9 +1,9 @@
-import { useGetTasksQuery, useUpdateTaskStatusMutation } from "@/state/api";
-import React from "react";
+import { useGetTasksQuery, useUpdateTaskStatusMutation, useDeleteTaskMutation } from "@/state/api";
+import React, { useState } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Task as TaskType } from "@/state/api";
-import { EllipsisVertical, MessageSquareMore, Plus } from "lucide-react";
+import { EllipsisVertical, MessageSquareMore, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
 
@@ -21,9 +21,14 @@ const BoardView = ({ id, setIsModalNewTaskOpen }: BoardProps) => {
     error,
   } = useGetTasksQuery({ projectId: Number(id) });
   const [updateTaskStatus] = useUpdateTaskStatusMutation();
+  const [deleteTaskMutation] = useDeleteTaskMutation();
 
   const moveTask = (taskId: number, toStatus: string) => {
     updateTaskStatus({ taskId, status: toStatus });
+  };
+
+  const handleDeleteTask = (taskId: number) => {
+    deleteTaskMutation(taskId);
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -39,6 +44,7 @@ const BoardView = ({ id, setIsModalNewTaskOpen }: BoardProps) => {
             tasks={tasks || []}
             moveTask={moveTask}
             setIsModalNewTaskOpen={setIsModalNewTaskOpen}
+            deleteTask={handleDeleteTask}
           />
         ))}
       </div>
@@ -51,6 +57,7 @@ type TaskColumnProps = {
   tasks: TaskType[];
   moveTask: (taskId: number, toStatus: string) => void;
   setIsModalNewTaskOpen: (isOpen: boolean) => void;
+  deleteTask: (taskId: number) => void;
 };
 
 const TaskColumn = ({
@@ -58,6 +65,7 @@ const TaskColumn = ({
   tasks,
   moveTask,
   setIsModalNewTaskOpen,
+  deleteTask,
 }: TaskColumnProps) => {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "task",
@@ -115,7 +123,7 @@ const TaskColumn = ({
       {tasks
         .filter((task) => task.status === status)
         .map((task) => (
-          <Task key={task.id} task={task} />
+          <Task key={task.id} task={task} deleteTask={deleteTask} />
         ))}
     </div>
   );
@@ -123,9 +131,11 @@ const TaskColumn = ({
 
 type TaskProps = {
   task: TaskType;
+  deleteTask: (taskId: number) => void;
 };
 
-const Task = ({ task }: TaskProps) => {
+const Task = ({ task, deleteTask }: TaskProps) => {
+  const [showMenu, setShowMenu] = useState(false);
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "task",
     item: { id: task.id },
@@ -197,9 +207,30 @@ const Task = ({ task }: TaskProps) => {
               ))}
             </div>
           </div>
-          <button className="flex h-6 w-4 flex-shrink-0 items-center justify-center dark:text-neutral-500">
-            <EllipsisVertical size={26} />
-          </button>
+          <div className="relative">
+            <button
+              className="flex h-6 w-4 flex-shrink-0 items-center justify-center dark:text-neutral-500"
+              onClick={() => setShowMenu(!showMenu)}
+            >
+              <EllipsisVertical size={26} />
+            </button>
+            {showMenu && (
+              <div className="absolute right-0 top-6 z-10 w-32 rounded-md bg-white shadow-lg dark:bg-dark-tertiary">
+                <button
+                  className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-dark-secondary"
+                  onClick={() => {
+                    if (confirm("Are you sure you want to delete this task?")) {
+                      deleteTask(task.id);
+                    }
+                    setShowMenu(false);
+                  }}
+                >
+                  <Trash2 size={16} />
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="my-3 flex justify-between">

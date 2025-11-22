@@ -2,7 +2,7 @@
 
 import { useAppDispatch, useAppSelector } from "@/app/redux";
 import { setIsSidebarCollapsed } from "@/state";
-import { useGetAuthUserQuery, useGetProjectsQuery } from "@/state/api";
+import { useGetAuthUserQuery, useGetProjectsQuery, useDeleteProjectMutation } from "@/state/api";
 import {
   AlertCircle,
   AlertOctagon,
@@ -17,6 +17,7 @@ import {
   Search,
   Settings,
   ShieldAlert,
+  Trash2,
   User,
   Users,
   X,
@@ -35,6 +36,7 @@ const Sidebar = () => {
   const [showPriority, setShowPriority] = useState(true);
 
   const { data: projects } = useGetProjectsQuery();
+  const [deleteProject] = useDeleteProjectMutation();
   const dispatch = useAppDispatch();
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed,
@@ -51,6 +53,14 @@ const Sidebar = () => {
       window.location.reload();
     } catch (error) {
       console.error("Error signing out: ", error);
+    }
+  };
+
+  const handleDeleteProject = (projectId: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (confirm("Are you sure you want to delete this project? All tasks will be deleted.")) {
+      deleteProject(projectId);
     }
   };
 
@@ -123,12 +133,19 @@ const Sidebar = () => {
         {/* PROJECTS LIST */}
         {showProjects &&
           projects?.map((project) => (
-            <SidebarLink
-              key={project.id}
-              icon={Briefcase}
-              label={project.name}
-              href={`/projects/${project.id}`}
-            />
+            <div key={project.id} className="group relative flex items-center">
+              <SidebarLink
+                icon={Briefcase}
+                label={project.name}
+                href={`/projects/${project.id}`}
+              />
+              <button
+                className="absolute right-2 hidden p-1 text-gray-400 hover:text-red-500 group-hover:block"
+                onClick={(e) => handleDeleteProject(project.id, e)}
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
           ))}
 
         {/* PRIORITIES LINKS */}
