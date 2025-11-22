@@ -38,3 +38,50 @@ export const createProject = async (
       .json({ message: `Error creating a project: ${error.message}` });
   }
 };
+
+export const deleteProject = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { projectId } = req.params;
+  try {
+    // Get all tasks for this project
+    const tasks = await prisma.task.findMany({
+      where: { projectId: Number(projectId) },
+      select: { id: true },
+    });
+    const taskIds = tasks.map((t) => t.id);
+
+    // Delete task-related records
+    if (taskIds.length > 0) {
+      await prisma.taskAssignment.deleteMany({
+        where: { taskId: { in: taskIds } },
+      });
+      await prisma.attachment.deleteMany({
+        where: { taskId: { in: taskIds } },
+      });
+      await prisma.comment.deleteMany({
+        where: { taskId: { in: taskIds } },
+      });
+      await prisma.task.deleteMany({
+        where: { projectId: Number(projectId) },
+      });
+    }
+
+    // Delete project teams
+    await prisma.projectTeam.deleteMany({
+      where: { projectId: Number(projectId) },
+    });
+
+    // Delete the project
+    await prisma.project.delete({
+      where: { id: Number(projectId) },
+    });
+
+    res.json({ message: "Project deleted successfully" });
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: `Error deleting project: ${error.message}` });
+  }
+};
