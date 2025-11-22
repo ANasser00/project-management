@@ -140,3 +140,137 @@ export const deleteTask = async (
     res.status(500).json({ message: `Error deleting task: ${error.message}` });
   }
 };
+
+export const getTaskById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { taskId } = req.params;
+  try {
+    const task = await prisma.task.findUnique({
+      where: { id: Number(taskId) },
+      include: {
+        project: true,
+        author: true,
+        assignee: true,
+        comments: {
+          include: {
+            user: true,
+          },
+          orderBy: { id: "desc" },
+        },
+        attachments: {
+          include: {
+            uploadedBy: true,
+          },
+        },
+        activities: {
+          include: {
+            user: true,
+          },
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
+
+    if (!task) {
+      res.status(404).json({ message: "Task not found" });
+      return;
+    }
+
+    res.json(task);
+  } catch (error: any) {
+    res.status(500).json({ message: `Error retrieving task: ${error.message}` });
+  }
+};
+
+export const updateTask = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { taskId } = req.params;
+  const { userId, ...updates } = req.body;
+
+  try {
+    // Get current task to compare for activity logging
+    const currentTask = await prisma.task.findUnique({
+      where: { id: Number(taskId) },
+    });
+
+    if (!currentTask) {
+      res.status(404).json({ message: "Task not found" });
+      return;
+    }
+
+    // Build activity entries for changed fields
+    const activities: {
+      taskId: number;
+      userId: number;
+      action: string;
+      field: string;
+      oldValue: string | null;
+      newValue: string | null;
+    }[] = [];
+
+    // Fields to track in activity log (exclude title and description)
+    const fieldMappings: { [key: string]: string } = {
+      status: "status",
+      priority: "priority",
+      assignedUserId: "assignee",
+      dueDate: "due_date",
+      startDate: "start_date",
+      points: "points",
+      tags: "tags",
+    };
+
+    for (const [field, activityField] of Object.entries(fieldMappings)) {
+      if (updates[field] !== undefined) {
+        const oldValue = currentTask[field as keyof typeof currentTask];
+        const newValue = updates[field];
+
+        // Only log if value actually changed
+        if (String(oldValue ?? "") !== String(newValue ?? "")) {
+          activities.push({
+            taskId: Number(taskId),
+            userId: Number(userId),
+            action: `${activityField}_changed`,
+            field: activityField,
+            oldValue: oldValue != null ? String(oldValue) : null,
+            newValue: newValue != null ? String(newValue) : null,
+          });
+        }
+      }
+    }
+
+    // Update task and create activities in a transaction
+    const [updatedTask] = await prisma.$transaction([
+      prisma.task.update({
+        where: { id: Number(taskId) },
+        data: updates,
+        include: {
+          project: true,
+          author: true,
+          assignee: true,
+          comments: {
+            include: { user: true },
+            orderBy: { id: "desc" },
+          },
+          attachments: {
+            include: { uploadedBy: true },
+          },
+          activities: {
+            include: { user: true },
+            orderBy: { createdAt: "desc" },
+          },
+        },
+      }),
+      ...(activities.length > 0
+        ? [prisma.taskActivity.createMany({ data: activities })]
+        : []),
+    ]);
+
+    res.json(updatedTask);
+  } catch (error: any) {
+    res.status(500).json({ message: `Error updating task: ${error.message}` });
+  }
+};

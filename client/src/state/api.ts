@@ -72,6 +72,23 @@ export interface Team {
   projectManagerUserId?: number;
 }
 
+export interface TaskActivity {
+  id: number;
+  taskId: number;
+  userId: number;
+  action: string;
+  field?: string;
+  oldValue?: string;
+  newValue?: string;
+  createdAt: string;
+  user: User;
+}
+
+export interface TaskDetails extends Task {
+  project: Project;
+  activities: TaskActivity[];
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -142,6 +159,21 @@ export const api = createApi({
       }),
       invalidatesTags: ["Tasks"],
     }),
+    getTaskById: build.query<TaskDetails, number>({
+      query: (taskId) => `tasks/${taskId}`,
+      providesTags: (result, error, taskId) => [{ type: "Tasks", id: taskId }],
+    }),
+    updateTask: build.mutation<TaskDetails, { taskId: number; userId: number } & Partial<Task>>({
+      query: ({ taskId, ...body }) => ({
+        url: `tasks/${taskId}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: (result, error, { taskId }) => [
+        { type: "Tasks", id: taskId },
+        { type: "Tasks" },
+      ],
+    }),
     getUsers: build.query<User[], void>({
       query: () => "users",
       providesTags: ["Users"],
@@ -161,9 +193,11 @@ export const {
   useCreateProjectMutation,
   useDeleteProjectMutation,
   useGetTasksQuery,
+  useGetTaskByIdQuery,
   useCreateTaskMutation,
   useDeleteTaskMutation,
   useUpdateTaskStatusMutation,
+  useUpdateTaskMutation,
   useSearchQuery,
   useGetUsersQuery,
   useGetTeamsQuery,

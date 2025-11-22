@@ -6,6 +6,7 @@ import { Task as TaskType } from "@/state/api";
 import { EllipsisVertical, MessageSquareMore, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 type BoardProps = {
   id: string;
@@ -135,6 +136,7 @@ type TaskProps = {
 };
 
 const Task = ({ task, deleteTask }: TaskProps) => {
+  const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "task",
@@ -143,6 +145,12 @@ const Task = ({ task, deleteTask }: TaskProps) => {
       isDragging: !!monitor.isDragging(),
     }),
   }));
+
+  const handleTaskClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on menu button or menu
+    if ((e.target as HTMLElement).closest('[data-menu]')) return;
+    router.push(`/tasks/${task.id}`);
+  };
 
   const taskTagsSplit = task.tags ? task.tags.split(",") : [];
 
@@ -178,7 +186,8 @@ const Task = ({ task, deleteTask }: TaskProps) => {
       ref={(instance) => {
         drag(instance);
       }}
-      className={`mb-4 rounded-md bg-white shadow dark:bg-dark-secondary ${
+      onClick={handleTaskClick}
+      className={`mb-4 cursor-pointer rounded-md bg-white shadow transition-shadow hover:shadow-md dark:bg-dark-secondary ${
         isDragging ? "opacity-50" : "opacity-100"
       }`}
     >
@@ -207,10 +216,13 @@ const Task = ({ task, deleteTask }: TaskProps) => {
               ))}
             </div>
           </div>
-          <div className="relative">
+          <div className="relative" data-menu>
             <button
               className="flex h-6 w-4 flex-shrink-0 items-center justify-center dark:text-neutral-500"
-              onClick={() => setShowMenu(!showMenu)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMenu(!showMenu);
+              }}
             >
               <EllipsisVertical size={26} />
             </button>
@@ -218,7 +230,8 @@ const Task = ({ task, deleteTask }: TaskProps) => {
               <div className="absolute right-0 top-6 z-10 w-32 rounded-md bg-white shadow-lg dark:bg-dark-tertiary">
                 <button
                   className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-dark-secondary"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (confirm("Are you sure you want to delete this task?")) {
                       deleteTask(task.id);
                     }

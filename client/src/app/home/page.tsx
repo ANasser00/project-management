@@ -2,10 +2,11 @@
 
 import {
   Priority,
-  Project,
+  Status,
   Task,
   useGetProjectsQuery,
-  useGetTasksQuery,
+  useGetTasksByUserQuery,
+  useGetAuthUserQuery,
 } from "@/state/api";
 import React from "react";
 import { useAppSelector } from "../redux";
@@ -36,17 +37,20 @@ const taskColumns: GridColDef[] = [
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 const HomePage = () => {
+  const { data: currentUser } = useGetAuthUserQuery();
   const {
     data: tasks,
     isLoading: tasksLoading,
     isError: tasksError,
-  } = useGetTasksQuery({ projectId: parseInt("1") });
+  } = useGetTasksByUserQuery(currentUser?.userId ?? 0, {
+    skip: !currentUser?.userId,
+  });
   const { data: projects, isLoading: isProjectsLoading } =
     useGetProjectsQuery();
 
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
-  if (tasksLoading || isProjectsLoading) return <div>Loading..</div>;
+  if (tasksLoading || isProjectsLoading || !currentUser) return <div>Loading..</div>;
   if (tasksError || !tasks || !projects) return <div>Error fetching data</div>;
 
   const priorityCount = tasks.reduce(
@@ -63,16 +67,16 @@ const HomePage = () => {
     count: priorityCount[key],
   }));
 
-  const statusCount = projects.reduce(
-    (acc: Record<string, number>, project: Project) => {
-      const status = project.endDate ? "Completed" : "Active";
+  const statusCount = tasks.reduce(
+    (acc: Record<string, number>, task: Task) => {
+      const status = task.status || "No Status";
       acc[status] = (acc[status] || 0) + 1;
       return acc;
     },
     {},
   );
 
-  const projectStatus = Object.keys(statusCount).map((key) => ({
+  const taskStatusDistribution = Object.keys(statusCount).map((key) => ({
     name: key,
     count: statusCount[key],
   }));
@@ -120,12 +124,12 @@ const HomePage = () => {
         </div>
         <div className="rounded-lg bg-white p-4 shadow dark:bg-dark-secondary">
           <h3 className="mb-4 text-lg font-semibold dark:text-white">
-            Project Status
+            Task Status Distribution
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Pie dataKey="count" data={projectStatus} fill="#82ca9d" label>
-                {projectStatus.map((entry, index) => (
+              <Pie dataKey="count" data={taskStatusDistribution} fill="#82ca9d" label>
+                {taskStatusDistribution.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={COLORS[index % COLORS.length]}
