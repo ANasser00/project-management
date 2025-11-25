@@ -2,7 +2,11 @@
 
 import { useAppDispatch, useAppSelector } from "@/app/redux";
 import { setIsSidebarCollapsed } from "@/state";
-import { useGetAuthUserQuery, useGetProjectsQuery, useDeleteProjectMutation } from "@/state/api";
+import {
+  useGetAuthUserQuery,
+  useGetProjectsQuery,
+  useDeleteProjectMutation,
+} from "@/state/api";
 import {
   AlertCircle,
   AlertOctagon,
@@ -14,6 +18,7 @@ import {
   Layers3,
   LockIcon,
   LucideIcon,
+  MessageCircle,
   Search,
   Settings,
   ShieldAlert,
@@ -59,7 +64,11 @@ const Sidebar = () => {
   const handleDeleteProject = (projectId: number, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (confirm("Are you sure you want to delete this project? All tasks will be deleted.")) {
+    if (
+      confirm(
+        "Are you sure you want to delete this project? All tasks will be deleted.",
+      )
+    ) {
       deleteProject(projectId);
     }
   };
@@ -93,7 +102,7 @@ const Sidebar = () => {
         {/* TEAM */}
         <div className="flex items-center gap-5 border-y-[1.5px] border-gray-200 px-8 py-4 dark:border-gray-700">
           <Image
-            src="https://pm--s3-images.s3.amazonaws.com/logo.png"
+            src={`https://api.dicebear.com/7.x/initials/png?seed=NASSER%20TEAM&backgroundColor=1f2937&fontSize=38`}
             alt="Logo"
             width={40}
             height={40}
@@ -116,6 +125,7 @@ const Sidebar = () => {
           <SidebarLink icon={Settings} label="Settings" href="/settings" />
           <SidebarLink icon={User} label="Users" href="/users" />
           <SidebarLink icon={Users} label="Teams" href="/teams" />
+          <SidebarLink icon={MessageCircle} label="AI Chat" href="/chat" />
         </nav>
 
         {/* PROJECTS LINKS */}
@@ -189,17 +199,19 @@ const Sidebar = () => {
       <div className="z-10 mt-32 flex w-full flex-col items-center gap-4 bg-white px-8 py-4 dark:bg-black md:hidden">
         <div className="flex w-full items-center">
           <div className="align-center flex h-9 w-9 justify-center">
-            {!!currentUser?.profilePictureUrl ? (
-              <Image
-                src={`https://pm--s3-images.s3.amazonaws.com/${currentUser?.profilePictureUrl}`}
-                alt={currentUser?.username || "User Profile Picture"}
-                width={100}
-                height={50}
-                className="h-full rounded-full object-cover"
-              />
-            ) : (
-              <User className="h-6 w-6 cursor-pointer self-center rounded-full dark:text-white" />
-            )}
+            <Image
+              src={
+                currentUser?.profilePictureUrl
+                  ? `${API}/uploads/${currentUser.profilePictureUrl}`
+                  : `https://api.dicebear.com/7.x/initials/svg?png=${encodeURIComponent(
+                      currentUser?.username || "User",
+                    )}&backgroundColor=1f2937&fontSize=38`
+              }
+              alt={currentUser?.username || "User Profile Picture"}
+              width={100}
+              height={50}
+              className="h-full rounded-full object-cover"
+            />
           </div>
           <span className="mx-3 text-gray-800 dark:text-white">
             {currentUser?.username}

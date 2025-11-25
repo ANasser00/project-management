@@ -1,12 +1,25 @@
-import { useGetTasksQuery, useUpdateTaskStatusMutation, useDeleteTaskMutation } from "@/state/api";
+import {
+  useGetTasksQuery,
+  useUpdateTaskStatusMutation,
+  useDeleteTaskMutation,
+} from "@/state/api";
 import React, { useState } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Task as TaskType } from "@/state/api";
-import { EllipsisVertical, MessageSquareMore, Plus, Trash2 } from "lucide-react";
+import {
+  EllipsisVertical,
+  MessageSquareMore,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+
+const API =
+  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
+  "http://localhost:8000";
 
 type BoardProps = {
   id: string;
@@ -147,8 +160,7 @@ const Task = ({ task, deleteTask }: TaskProps) => {
   }));
 
   const handleTaskClick = (e: React.MouseEvent) => {
-    // Don't navigate if clicking on menu button or menu
-    if ((e.target as HTMLElement).closest('[data-menu]')) return;
+    if ((e.target as HTMLElement).closest("[data-menu]")) return;
     router.push(`/tasks/${task.id}`);
   };
 
@@ -193,7 +205,11 @@ const Task = ({ task, deleteTask }: TaskProps) => {
     >
       {task.attachments && task.attachments.length > 0 && (
         <Image
-          src={`https://pm--s3-images.s3.amazonaws.com/${task.attachments[0].fileURL}`}
+          src={
+            task.attachments[0].fileURL
+              ? `${API}/uploads/${task.attachments[0].fileURL}`
+              : "https://via.placeholder.com/400x200?text=No+Image"
+          }
           alt={task.attachments[0].fileName}
           width={400}
           height={200}
@@ -270,7 +286,13 @@ const Task = ({ task, deleteTask }: TaskProps) => {
             {task.assignee && (
               <Image
                 key={task.assignee.userId}
-                src={`https://pm--s3-images.s3.amazonaws.com/${task.assignee.profilePictureUrl!}`}
+                src={
+                  task.assignee.profilePictureUrl
+                    ? `${API}/uploads/${task.assignee.profilePictureUrl}`
+                    : `https://api.dicebear.com/7.x/initials/png?seed=${encodeURIComponent(
+                        task.assignee.username || "User",
+                      )}&backgroundColor=1f2937&fontSize=38`
+                }
                 alt={task.assignee.username}
                 width={30}
                 height={30}
@@ -280,7 +302,13 @@ const Task = ({ task, deleteTask }: TaskProps) => {
             {task.author && (
               <Image
                 key={task.author.userId}
-                src={`https://pm--s3-images.s3.amazonaws.com/${task.author.profilePictureUrl!}`}
+                src={
+                  task.author.profilePictureUrl
+                    ? `${API}/uploads/${task.author.profilePictureUrl}`
+                    : `https://api.dicebear.com/7.x/initials/png?seed=${encodeURIComponent(
+                        task.author.username || "User",
+                      )}&backgroundColor=1f2937&fontSize=38`
+                }
                 alt={task.author.username}
                 width={30}
                 height={30}

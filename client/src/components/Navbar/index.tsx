@@ -1,10 +1,19 @@
-import React from "react";
-import { Menu, Moon, Search, Settings, Sun, User } from "lucide-react";
+import React, { useState } from "react";
+import {
+  Menu,
+  Moon,
+  Search,
+  Settings,
+  Sun,
+  User,
+  PlusSquare,
+} from "lucide-react";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/app/redux";
 import { setIsDarkMode, setIsSidebarCollapsed } from "@/state";
 import { useGetAuthUserQuery } from "@/state/api";
 import Image from "next/image";
+import ModalNewProject from "@/app/projects/ModalNewProject"; // <-- import the modal
 
 const API =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
@@ -18,6 +27,9 @@ const Navbar = () => {
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
   const { data: currentUser } = useGetAuthUserQuery();
+
+  // Modal state
+  const [isModalNewProjectOpen, setIsModalNewProjectOpen] = useState(false);
 
   const handleSignOut = async (): Promise<void> => {
     try {
@@ -52,6 +64,17 @@ const Navbar = () => {
             placeholder="Search..."
           />
         </div>
+        {/* New Boards Button */}
+        <button
+          className="ml-4 flex items-center rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-700"
+          onClick={() => setIsModalNewProjectOpen(true)}
+        >
+          <PlusSquare className="mr-2 h-5 w-5" /> New Project
+        </button>
+        <ModalNewProject
+          isOpen={isModalNewProjectOpen}
+          onClose={() => setIsModalNewProjectOpen(false)}
+        />
       </div>
 
       {/* Icons */}
@@ -83,17 +106,19 @@ const Navbar = () => {
         <div className="ml-2 mr-5 hidden min-h-[2em] w-[0.1rem] bg-gray-200 md:inline-block"></div>
         <div className="hidden items-center justify-between md:flex">
           <div className="align-center flex h-9 w-9 justify-center">
-            {!!currentUser?.profilePictureUrl ? (
-              <Image
-                src={`https://pm--s3-images.s3.amazonaws.com/${currentUser?.profilePictureUrl}`}
-                alt={currentUser?.username || "User Profile Picture"}
-                width={100}
-                height={50}
-                className="h-full rounded-full object-cover"
-              />
-            ) : (
-              <User className="h-6 w-6 cursor-pointer self-center rounded-full dark:text-white" />
-            )}
+            <Image
+              src={
+                currentUser?.profilePictureUrl
+                  ? `${API}/uploads/${currentUser.profilePictureUrl}`
+                  : `https://api.dicebear.com/7.x/initials/png?seed=${encodeURIComponent(
+                      currentUser?.username || "User",
+                    )}&backgroundColor=1f2937&fontSize=38`
+              }
+              alt={currentUser?.username || "User Profile Picture"}
+              width={100}
+              height={50}
+              className="h-full rounded-full object-cover"
+            />
           </div>
           <span className="mx-3 text-gray-800 dark:text-white">
             {currentUser?.username}

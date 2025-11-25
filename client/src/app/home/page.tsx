@@ -50,7 +50,8 @@ const HomePage = () => {
 
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
-  if (tasksLoading || isProjectsLoading || !currentUser) return <div>Loading..</div>;
+  if (tasksLoading || isProjectsLoading || !currentUser)
+    return <div>Loading..</div>;
   if (tasksError || !tasks || !projects) return <div>Error fetching data</div>;
 
   const priorityCount = tasks.reduce(
@@ -128,7 +129,12 @@ const HomePage = () => {
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Pie dataKey="count" data={taskStatusDistribution} fill="#82ca9d" label>
+              <Pie
+                dataKey="count"
+                data={taskStatusDistribution}
+                fill="#82ca9d"
+                label
+              >
                 {taskStatusDistribution.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
