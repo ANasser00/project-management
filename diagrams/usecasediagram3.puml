@@ -1,0 +1,90 @@
+@startuml
+
+title Startup Product Launch
+
+actor "Founder" as Founder
+actor "Product\nManager" as PM
+actor "Developer" as Dev
+actor "Designer" as Designer
+actor "Marketing" as Marketing
+actor "Stakeholder" as Stakeholder
+
+' --- Main use cases ---
+usecase "MVP features" as UC_MVP
+usecase "Cross-team work" as UC_CROSS
+usecase "Launch list" as UC_LAUNCH
+usecase "See progress" as UC_PROGRESS
+usecase "Post-launch bugs" as UC_POSTBUGS
+
+' --- Included details (simple) ---
+
+' MVP features
+usecase "Backlog" as UC_BACKLOG
+usecase "Move to\nDone" as UC_DONE
+
+' Cross-team work
+usecase "Assign to\ndev" as UC_TO_DEV
+usecase "Assign to\ndesign" as UC_TO_DESIGN
+usecase "Assign to\nmarketing" as UC_TO_MKT
+
+' Launch list
+usecase "Make launch\ntasks" as UC_LAUNCH_TASKS
+usecase "Set due\ndates" as UC_LAUNCH_DATES
+usecase "Check\nstatus" as UC_LAUNCH_STATUS
+
+' See progress
+usecase "See board" as UC_PROG_BOARD
+usecase "See charts" as UC_PROG_CHARTS
+
+' Post-launch bugs
+usecase "Log bugs" as UC_LOG_BUGS
+usecase "Set urgent\npriority" as UC_URGENT
+
+' --- include relations ---
+UC_MVP ..> UC_BACKLOG : <<include>>
+UC_MVP ..> UC_DONE : <<include>>
+
+UC_CROSS ..> UC_TO_DEV : <<include>>
+UC_CROSS ..> UC_TO_DESIGN : <<include>>
+UC_CROSS ..> UC_TO_MKT : <<include>>
+
+UC_LAUNCH ..> UC_LAUNCH_TASKS : <<include>>
+UC_LAUNCH ..> UC_LAUNCH_DATES : <<include>>
+UC_LAUNCH ..> UC_LAUNCH_STATUS : <<include>>
+
+UC_PROGRESS ..> UC_PROG_BOARD : <<include>>
+UC_PROGRESS ..> UC_PROG_CHARTS : <<include>>
+
+UC_POSTBUGS ..> UC_LOG_BUGS : <<include>>
+UC_POSTBUGS ..> UC_URGENT : <<include>>
+
+' --- Actors → main use cases ---
+
+Founder --> UC_MVP
+Founder --> UC_CROSS
+Founder --> UC_LAUNCH
+Founder --> UC_PROGRESS
+Founder --> UC_POSTBUGS
+
+PM --> UC_MVP
+PM --> UC_CROSS
+PM --> UC_LAUNCH
+PM --> UC_PROGRESS
+PM --> UC_POSTBUGS
+
+Dev --> UC_MVP
+Dev --> UC_CROSS
+Dev --> UC_LAUNCH
+Dev --> UC_POSTBUGS
+
+Designer --> UC_MVP
+Designer --> UC_CROSS
+Designer --> UC_LAUNCH
+
+Marketing --> UC_CROSS
+Marketing --> UC_LAUNCH
+Marketing --> UC_PROGRESS
+
+Stakeholder --> UC_PROGRESS
+
+@enduml

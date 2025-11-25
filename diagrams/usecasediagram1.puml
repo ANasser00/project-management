@@ -1,0 +1,69 @@
+@startuml
+
+title Software Development Team (Agile/Scrum)
+
+actor "Product Owner" as PO
+actor "Scrum Master" as SM
+actor "Developer" as Dev
+actor "QA" as QA
+
+' --- Main use cases ---
+usecase "Plan sprint" as UC_PLAN
+usecase "Daily board" as UC_BOARD
+usecase "Bugs" as UC_BUGS
+usecase "Code review" as UC_REVIEW
+usecase "Sprint review" as UC_RETRO
+
+' --- Included details (simple) ---
+usecase "Make tasks" as UC_TASKS
+usecase "Set points" as UC_POINTS
+usecase "Set dates" as UC_DATES
+
+usecase "Change status" as UC_STATUS
+usecase "See flow\n(To Do → Done)" as UC_FLOW
+
+usecase "Set priority" as UC_PRI
+usecase "Track bug\nstatus" as UC_BUG_STATUS
+
+usecase "Mark\nUnder Review" as UC_UNDER_REVIEW
+usecase "Add comments" as UC_COMMENTS
+usecase "Approve" as UC_APPROVE
+
+usecase "View\nactivity log" as UC_ACT_LOG
+
+' --- include relations ---
+UC_PLAN ..> UC_TASKS : <<include>>
+UC_PLAN ..> UC_POINTS : <<include>>
+UC_PLAN ..> UC_DATES : <<include>>
+
+UC_BOARD ..> UC_STATUS : <<include>>
+UC_BOARD ..> UC_FLOW : <<include>>
+
+UC_BUGS ..> UC_PRI : <<include>>
+UC_BUGS ..> UC_BUG_STATUS : <<include>>
+
+UC_REVIEW ..> UC_UNDER_REVIEW : <<include>>
+UC_REVIEW ..> UC_COMMENTS : <<include>>
+UC_REVIEW ..> UC_APPROVE : <<include>>
+
+UC_RETRO ..> UC_ACT_LOG : <<include>>
+
+' --- Actor → main use cases ---
+PO --> UC_PLAN
+PO --> UC_RETRO
+
+SM --> UC_PLAN
+SM --> UC_BOARD
+SM --> UC_RETRO
+
+Dev --> UC_PLAN
+Dev --> UC_BOARD
+Dev --> UC_BUGS
+Dev --> UC_REVIEW
+
+QA --> UC_BOARD
+QA --> UC_BUGS
+QA --> UC_REVIEW
+QA --> UC_RETRO
+
+@enduml
