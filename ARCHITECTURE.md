@@ -1,19 +1,19 @@
 ```mermaid
 flowchart LR
   %% Top-level actors
-  U[User<br/>(Browser / Client)]
+  U[User(Browser / Client)]
 
   %% Client subgraph
   subgraph CLIENT["Client — Next.js + Tailwind (client/)"]
-    C[Next.js app<br/>client/src]
-    STATIC[Static assets<br/>client/public]
+    C[Next.js appclient/src]
+    STATIC[Static assetsclient/public]
   end
 
   %% Server subgraph
   subgraph SERVER["Server — TypeScript (Bun/Node) (server/)"]
-    API[API server<br/>server/src]
-    PRISMA[Prisma ORM & schema<br/>server/prisma]
-    ENV[Environment config<br/>server/.env.example]
+    API[API serverserver/src]
+    PRISMA[Prisma ORM & schemaserver/prisma]
+    ENV[Environment configserver/.env.example]
   end
 
   %% Database and external services
