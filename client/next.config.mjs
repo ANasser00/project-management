@@ -7,6 +7,12 @@ const nextConfig = {
         hostname: "pm--s3-images.s3.amazonaws.com",
         port: "",
         pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "api.dicebear.com",
+        port: "",
+        pathname: "/**",
       }
     ]
   }

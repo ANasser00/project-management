@@ -7,6 +7,10 @@ type Props = {
   task: Task;
 };
 
+const API =
+  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
+  "http://localhost:8000";
+
 const TaskCard = ({ task }: Props) => {
   return (
     <div className="mb-3 rounded bg-white p-4 shadow dark:bg-dark-secondary dark:text-white">
@@ -16,7 +20,11 @@ const TaskCard = ({ task }: Props) => {
           <div className="flex flex-wrap">
             {task.attachments && task.attachments.length > 0 && (
               <Image
-                src={`https://pm--s3-images.s3.amazonaws.com/${task.attachments[0].fileURL}`}
+                src={
+                  task.attachments[0].fileURL
+                    ? `${API}/uploads/${task.attachments[0].fileURL}`
+                    : "https://via.placeholder.com/400x200?text=No+Image"
+                }
                 alt={task.attachments[0].fileName}
                 width={400}
                 height={200}

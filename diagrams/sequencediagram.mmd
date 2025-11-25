@@ -1,0 +1,46 @@
+
+sequenceDiagram
+  autonumber
+
+  participant U as User (Browser)
+  participant C as Client App (Next.js)
+  participant AI_UI as AI Task Chat UI
+  participant API as Backend API (Express)
+  participant AI_SVC as AI Service (/ai/chat)
+  participant LLM as Google Gemini
+  participant DB as Database (PostgreSQL)
+
+  U->>C: Open AI Task Chat page
+  C->>AI_UI: Render chat UI
+
+  U->>AI_UI: "Create a task to take out the trash next week"
+  AI_UI->>API: POST /ai/chat (message + history)
+  API->>AI_SVC: Forward request with context\n(users, projects, tasks)
+  AI_SVC->>LLM: Prompt + context\n(ask for structured JSON)
+  LLM-->>AI_SVC: JSON (action=create,\nfields for new task)
+  AI_SVC-->>API: { extracted: ... }
+  API-->>AI_UI: Response with extracted task
+
+  AI_UI->>U: Show extracted task summary\n(title, dates, assignee, etc.)
+  U->>AI_UI: Click "Create Task"
+  AI_UI->>API: POST /tasks (task data)
+  API->>DB: Insert Task via Prisma
+  DB-->>API: Task created
+  API-->>AI_UI: Task created response
+  AI_UI-->>U: Show "Task created successfully"
+
+  U->>AI_UI: "Make that task urgent"
+  AI_UI->>API: POST /ai/chat (message + history)
+  API->>AI_SVC: Forward request with context\n(includes existing tasks)
+  AI_SVC->>LLM: Prompt + task list
+  LLM-->>AI_SVC: JSON (action=update,\n taskId + updatedFields)
+  AI_SVC-->>API: { extracted: ... }
+  API-->>AI_UI: Response with update instructions
+
+  AI_UI->>U: Show "Update Task #N priority to Urgent?"
+  U->>AI_UI: Confirm update
+  AI_UI->>API: PATCH /tasks/:id (updatedFields)
+  API->>DB: Update Task via Prisma
+  DB-->>API: Task updated
+  API-->>AI_UI: Task updated response
+  AI_UI-->>U: Show "Task updated successfully"

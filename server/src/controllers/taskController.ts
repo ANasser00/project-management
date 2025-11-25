@@ -42,6 +42,19 @@ export const createTask = async (
     authorUserId,
     assignedUserId,
   } = req.body;
+
+  if (!title || !projectId || !authorUserId) {
+    console.log("Missing required fields:", { title, projectId, authorUserId });
+    return;
+  }
+
+  // Check if project exists
+  const project = await prisma.project.findUnique({ where: { id: projectId } });
+  if (!project) {
+    console.log("Project does not exist:", projectId);
+    return;
+  }
+
   try {
     const newTask = await prisma.task.create({
       data: {
@@ -60,6 +73,7 @@ export const createTask = async (
     });
     res.status(201).json(newTask);
   } catch (error: any) {
+    console.error("Error creating a task:", error); // Add this line
     res
       .status(500)
       .json({ message: `Error creating a task: ${error.message}` });
@@ -180,7 +194,9 @@ export const getTaskById = async (
 
     res.json(task);
   } catch (error: any) {
-    res.status(500).json({ message: `Error retrieving task: ${error.message}` });
+    res
+      .status(500)
+      .json({ message: `Error retrieving task: ${error.message}` });
   }
 };
 
