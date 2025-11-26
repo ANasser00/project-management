@@ -1,34 +1,41 @@
 @startuml
+left to right direction
 
 title University Group Project
 
+' --- Left-side actors ---
 actor "Student\nTeam Member" as Student
 actor "Team Lead\n(optional)" as Lead
+
+rectangle "ALIGNIX – University Group Project" as System {
+
+  ' --- Main use cases ---
+  usecase "Break assignment" as UC_BREAK
+  usecase "Assign work" as UC_ASSIGN
+  usecase "Deadlines" as UC_DEADLINES
+  usecase "See progress" as UC_PROGRESS
+
+  ' --- Included details ---
+
+  ' Break assignment
+  usecase "Make tasks\nper section" as UC_TASKS_SECTIONS
+  usecase "Group tasks\nper deliverable" as UC_TASKS_DELIV
+
+  ' Assign work
+  usecase "Assign tasks\nto members" as UC_ASSIGN_MEMBER
+  usecase "Balance\nworkload" as UC_BALANCE
+
+  ' Deadlines
+  usecase "Set due\ndates" as UC_SET_DATES
+  usecase "See dates\non timeline" as UC_SEE_TIMELINE
+
+  ' See progress
+  usecase "See who\ndid what" as UC_WHO_DID
+  usecase "See task\nstatus" as UC_STATUS_VIEW
+}
+
+' --- Right-side actor ---
 actor "Advisor /\nInstructor" as Advisor
-
-' --- Main use cases ---
-usecase "Break assignment" as UC_BREAK
-usecase "Assign work" as UC_ASSIGN
-usecase "Deadlines" as UC_DEADLINES
-usecase "See progress" as UC_PROGRESS
-
-' --- Included details (simple) ---
-
-' Break assignment
-usecase "Make tasks\nper section" as UC_TASKS_SECTIONS
-usecase "Group tasks\nper deliverable" as UC_TASKS_DELIV
-
-' Assign work
-usecase "Assign tasks\nto members" as UC_ASSIGN_MEMBER
-usecase "Balance\nworkload" as UC_BALANCE
-
-' Deadlines
-usecase "Set due\ndates" as UC_SET_DATES
-usecase "See dates\non timeline" as UC_SEE_TIMELINE
-
-' See progress
-usecase "See who\ndid what" as UC_WHO_DID
-usecase "See task\nstatus" as UC_STATUS_VIEW
 
 ' --- include relations ---
 UC_BREAK ..> UC_TASKS_SECTIONS : <<include>>
@@ -43,8 +50,7 @@ UC_DEADLINES ..> UC_SEE_TIMELINE : <<include>>
 UC_PROGRESS ..> UC_WHO_DID : <<include>>
 UC_PROGRESS ..> UC_STATUS_VIEW : <<include>>
 
-' --- Actors → main use cases ---
-
+' --- Actors → main use cases (left) ---
 Student --> UC_BREAK
 Student --> UC_ASSIGN
 Student --> UC_DEADLINES
@@ -55,6 +61,7 @@ Lead --> UC_ASSIGN
 Lead --> UC_DEADLINES
 Lead --> UC_PROGRESS
 
+' --- Actor → main use cases (right) ---
 Advisor --> UC_PROGRESS
 
 @enduml
