@@ -283,38 +283,54 @@ const Task = ({ task, deleteTask }: TaskProps) => {
         {/* Users */}
         <div className="mt-3 flex items-center justify-between">
           <div className="flex -space-x-[6px] overflow-hidden">
-            {task.assignee && (
-              <Image
-                key={task.assignee.userId}
-                src={
-                  task.assignee.profilePictureUrl
-                    ? `${API}/uploads/${task.assignee.profilePictureUrl}`
-                    : `https://api.dicebear.com/7.x/initials/png?seed=${encodeURIComponent(
-                        task.assignee.username || "User",
-                      )}&backgroundColor=1f2937&fontSize=38`
-                }
-                alt={task.assignee.username}
-                width={30}
-                height={30}
-                className="h-8 w-8 rounded-full border-2 border-white object-cover dark:border-dark-secondary"
-              />
-            )}
-            {task.author && (
-              <Image
-                key={task.author.userId}
-                src={
-                  task.author.profilePictureUrl
-                    ? `${API}/uploads/${task.author.profilePictureUrl}`
-                    : `https://api.dicebear.com/7.x/initials/png?seed=${encodeURIComponent(
-                        task.author.username || "User",
-                      )}&backgroundColor=1f2937&fontSize=38`
-                }
-                alt={task.author.username}
-                width={30}
-                height={30}
-                className="h-8 w-8 rounded-full border-2 border-white object-cover dark:border-dark-secondary"
-              />
-            )}
+            {/* Render assignee avatar if different from author */}
+            {task.assignee &&
+              (!task.author || task.assignee.userId !== task.author.userId) &&
+              (task.assignee.profilePictureUrl ? (
+                <Image
+                  key={`assignee-${task.assignee.userId}`}
+                  src={`${API}/uploads/${task.assignee.profilePictureUrl}`}
+                  alt={task.assignee.username}
+                  width={30}
+                  height={30}
+                  className="h-8 w-8 rounded-full border-2 border-white object-cover dark:border-dark-secondary"
+                />
+              ) : (
+                <Image
+                  key={`assignee-${task.assignee.userId}`}
+                  src={`https://api.dicebear.com/7.x/initials/png?seed=${encodeURIComponent(
+                    task.assignee.username || "User",
+                  )}&backgroundColor=1f2937&fontSize=38`}
+                  alt={task.assignee.username}
+                  width={30}
+                  height={30}
+                  className="h-8 w-8 rounded-full border-2 border-white object-cover dark:border-dark-secondary"
+                />
+              ))}
+
+            {/* Render author avatar */}
+            {task.author &&
+              (task.author.profilePictureUrl ? (
+                <Image
+                  key={`author-${task.author.userId}`}
+                  src={task.author.profilePictureUrl as string}
+                  alt={task.author.username}
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                />
+              ) : (
+                <Image
+                  key={`author-${task.author.userId}`}
+                  src={`https://api.dicebear.com/7.x/initials/png?seed=${encodeURIComponent(
+                    task.author.username || "User",
+                  )}&backgroundColor=1f2937&fontSize=38`}
+                  alt={task.author.username}
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                />
+              ))}
           </div>
           <div className="flex items-center text-gray-500 dark:text-neutral-500">
             <MessageSquareMore size={20} />

@@ -123,6 +123,19 @@ export default function AiTaskChatBox() {
     }
   }, [projects, selectedProjectId]);
 
+  // Load chat from localStorage on mount
+  useEffect(() => {
+    const savedChat = localStorage.getItem("ai-task-chat");
+    if (savedChat) {
+      setChat(JSON.parse(savedChat));
+    }
+  }, []);
+
+  // Save chat to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("ai-task-chat", JSON.stringify(chat));
+  }, [chat]);
+
   // Find userId by username (case-insensitive)
   const findUserId = (username: string) => {
     if (!users || !username) return undefined;
@@ -261,7 +274,7 @@ export default function AiTaskChatBox() {
 
         await updateTask({
           taskId,
-          userId: currentUser.userId,
+          userId: currentUser?.userId as number,
           ...resolved,
         }).unwrap();
 
@@ -354,7 +367,7 @@ export default function AiTaskChatBox() {
           : undefined,
         assignedUserId,
         projectId,
-        authorUserId: currentUser.userId,
+        authorUserId: currentUser?.userId,
       }).unwrap();
 
       setChat((prev) =>

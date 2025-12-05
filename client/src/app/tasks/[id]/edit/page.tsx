@@ -73,15 +73,17 @@ export default function EditTaskPage({ params }: Props) {
     e.preventDefault();
     await updateTask({
       taskId,
-      userId: currentUser?.userId ?? task.authorUserId,
+      userId: currentUser?.userId ?? (task.authorUserId as number),
       title: form.title,
       description: form.description,
       status: form.status,
       priority: form.priority,
       tags: form.tags,
-      startDate: form.startDate ? new Date(form.startDate).toISOString() : null,
-      dueDate: form.dueDate ? new Date(form.dueDate).toISOString() : null,
-      assignedUserId: form.assignedUserId ?? null,
+      startDate: form.startDate
+        ? new Date(form.startDate).toISOString()
+        : undefined,
+      dueDate: form.dueDate ? new Date(form.dueDate).toISOString() : undefined,
+      assignedUserId: form.assignedUserId ?? undefined,
     });
     router.push(`/projects/${task.projectId}`);
   };
