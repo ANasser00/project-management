@@ -15,9 +15,7 @@ import { useGetAuthUserQuery } from "@/state/api";
 import Image from "next/image";
 import ModalNewProject from "@/app/projects/ModalNewProject"; // <-- import the modal
 
-const API =
-  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
-  "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
 const Navbar = () => {
   const dispatch = useAppDispatch();
