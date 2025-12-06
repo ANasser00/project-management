@@ -1,15 +1,15 @@
-FROM node:20-alpine
+FROM oven/bun:1.1.13
 
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-RUN npm install
+COPY package.json bun.lockb ./
+RUN bun install
 
 COPY . .
 
-# Generate Prisma client
-RUN npx prisma generate
+RUN bun run prisma generate
+RUN bun run build
 
 EXPOSE 8000
 
-CMD ["npm", "run", "start"]
+CMD ["bun", "run", "start"]
