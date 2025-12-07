@@ -12,6 +12,8 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    mem_limit: 256m
+    cpus: 0.25
 
   backend:
     build: ./server
@@ -21,20 +23,26 @@ services:
       JWT_SECRET: secret_key_awesome_ak147
       CLIENT_ORIGIN: http://localhost:3000
       PORT: 8000
+      NODE_ENV: production
     ports:
       - "8000:8000"
     depends_on:
       - db
+    mem_limit: 384m
+    cpus: 0.35
 
   frontend:
     build: ./client
     restart: always
     environment:
       NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+      NODE_ENV: production
     ports:
       - "3000:3000"
     depends_on:
       - backend
+    mem_limit: 256m
+    cpus: 0.25
 
 volumes:
   db_data:
