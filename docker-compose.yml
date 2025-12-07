@@ -25,7 +25,7 @@ services:
       PORT: 8005
       NODE_ENV: production
     ports:
-      - "8000:8000"
+      - "8005:8005"
     depends_on:
       - db
     mem_limit: 384m
