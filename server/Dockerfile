@@ -8,7 +8,8 @@ RUN bun install
 COPY . .
 
 RUN bun run prisma generate
+RUN bun run build
 
-EXPOSE 8000
+EXPOSE 8005
 
-CMD ["bun", "dev"]
+CMD ["bun", "run", "start"]
