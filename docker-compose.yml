@@ -21,8 +21,8 @@ services:
     environment:
       DATABASE_URL: postgres://myuser:mypassword@db:5432/mydb
       JWT_SECRET: secret_key_awesome_ak147
-      CLIENT_ORIGIN: http://localhost:3000
-      PORT: 8000
+      CLIENT_ORIGIN: http://178.62.249.246:3000
+      PORT: 8005
       NODE_ENV: production
     ports:
       - "8000:8000"
