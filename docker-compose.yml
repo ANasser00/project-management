@@ -35,7 +35,7 @@ services:
     build: ./client
     restart: always
     environment:
-      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+      NEXT_PUBLIC_API_BASE_URL: http://178.62.249.246:8005
       NODE_ENV: production
     ports:
       - "3000:3000"
